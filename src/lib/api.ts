@@ -16,18 +16,51 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log outgoing request
+    console.log('🚀 API Request:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
+      headers: config.headers,
+      data: config.data,
+    });
+    
     return config;
   },
   (error) => {
+    console.error('❌ API Request Error:', error);
     return Promise.reject(error);
   }
 );
 
 // Handle response errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful response
+    console.log('✅ API Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.config.url,
+      data: response.data,
+    });
+    
+    return response;
+  },
   (error) => {
+    // Log error response
+    console.error('❌ API Error:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      url: error.config?.url,
+      data: error.response?.data,
+      fullError: error,
+    });
+    
     if (error.response?.status === 401) {
+      console.warn('🔒 Unauthorized - Clearing token and redirecting to login');
       localStorage.removeItem('adminToken');
       window.location.href = '/login';
     }
