@@ -36,9 +36,15 @@ const Subscriptions = () => {
   const fetchPlans = async () => {
     try {
       const response = await api.get('/api/subscriptions/plans');
-      setPlans(response.data);
-    } catch (error) {
+      // Handle different response formats
+      const plansData = Array.isArray(response.data) 
+        ? response.data 
+        : response.data?.plans || [];
+      setPlans(plansData);
+    } catch (error: any) {
+      console.error('Failed to load subscription plans:', error);
       toast.error('Failed to load subscription plans');
+      setPlans([]); // Ensure plans is always an array
     } finally {
       setIsLoading(false);
     }
